@@ -30,7 +30,7 @@ Even for unrecognized vendors, the parser scans field names and values to match 
 
 ### Step 1 — Create the Lambda in CTM
 
-1. Log in to [CallTrackingMetrics](https://app.calltrackingmetrics.com) and go to your account.
+1. Log in to [CTM](https://app.calltrackingmetrics.com) and go to your account.
 2. Navigate to **Account → Integrations → Lambda Functions**.
    - Direct link: `https://app.calltrackingmetrics.com/accounts/YOUR_ACCOUNT_ID/lambdas`
    - Full setup guide: [CTM Lambda Functions](https://calltrackingmetrics.zendesk.com/hc/en-us/articles/6603700875661-CTM-Lambda-Functions)
