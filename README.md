@@ -4,7 +4,7 @@ A universal Lambda function for [CTM](https://calltrackingmetrics.com) that pars
 
 ## What It Does
 
-When a web form is submitted, most form vendors POST a webhook to a URL you specify. The problem is that every vendor structures that payload differently. This Lambda sits between the form vendor and CTM, translating any incoming webhook into the standard fields CTM needs (`caller_name`, `email`, `phone_number`, `callback_number`, `country_code`, `custom_fields`).
+When a web form is submitted, most form vendors POST a webhook to a URL you specify. The problem is that every vendor structures that payload differently. This Lambda sits between the form vendor and CTM, translating any incoming webhook into the standard fields CTM needs (`caller_name`, `email`, `phone_number`, `callback_number`, `country_code`, `visitor_sid`, `custom_fields`).
 
 **Natively recognized vendors:**
 
@@ -54,7 +54,7 @@ A Form Reactor is the CTM construct that receives a webhook POST and routes it t
    - **Name** — something identifiable, e.g. `Contact Page Form`
    - **Tracking Number** — the CTM number that will receive calls/texts triggered by this form
    - **Inbound Form Parser** — select the Lambda you created in Step 1
-   <img width="1623" height="335" alt="Screenshot 2026-06-20 at 7 08 00 AM" src="https://github.com/user-attachments/assets/7a8f7db9-024b-4b35-bfa3-e8f7da160d76" />
+   <img width="1623" height="335" alt="Screenshot 2026-06-20 at 7 08 00 AM" src="https://github.com/user-attachments/assets/7a8f7db9-024b-4b35-bfa3-e8f7da160d76" />
 
 4. Click **Save**.
 
@@ -80,7 +80,7 @@ Paste the Form Reactor POST URL as the webhook destination in your form tool.
 
 **Vendor-specific notes:**
 
-- **JotForm** — By default JotForm sends `multipart/form-data`, which CTM cannot parse. In your JotForm webhook settings, enable **"Send as JSON"** (or set the content type to `application/json`). Without this, the Lambda will receive an empty body.
+- **JotForm** — By default JotForm sends `multipart/form-data`, which CTM cannot parse. In your JotForm webhook settings, enable **"Send as JSON"** (or set the content type to `application/json`). Without this, the Lambda will receive an empty body. JotForm also wraps field keys in curly braces (`{name}`, `{phoneNumber12}`) — the parser strips these automatically before pattern matching.
 - **Facebook / Meta Lead Ads** — You must set up the webhook through Meta's developer portal and subscribe to `leadgen` events. The Form Reactor URL is your callback endpoint.
 - **Typeform** — In the Typeform webhook settings, enable **"Include response"** to include answer data in the payload.
 - **GoHighLevel** — Use the form's **"Webhook"** action in the workflow builder. Select `POST` and paste the Form Reactor URL.
@@ -102,21 +102,26 @@ Incoming webhook POST
                           into {key: value} pairs with semantic keys
         │
         ▼
-  Key-pattern scan     ← matches caller_name, first/last name, email, phone by
-                          field label keywords (e.g. "mobile", "callback", "e-mail")
+  sanitizeKeys()       ← strips {braces} from vendor field names (e.g. JotForm)
+                          so pattern matching works regardless of key format
+        │
+        ▼
+  Key-pattern scan     ← matches caller_name, first/last name, email, phone, and
+                          visitor_sid by field label keywords
         │
         ▼
   Value fallback scan  ← if key patterns miss, scans all values for phone/email shape
         │
         ▼
   custom_fields build  ← every remaining non-noise field → custom_{key}
-                          key collisions get _2, _3 suffix
+                          promoted SID fields suppressed; key collisions get _2, _3 suffix
         │
         ▼
   context.done(null, payload)
 ```
 
 **Output format:**
+
 ```json
 {
   "phone_number": "4435551234",
@@ -124,12 +129,15 @@ Incoming webhook POST
   "country_code": "1",
   "caller_name": "Jane Doe",
   "email": "jane@example.com",
+  "visitor_sid": "67bf826f00002dfe4f6c5d06",
   "custom_fields": {
     "custom_message": "I need a quote",
     "custom_company": "Acme Corp"
   }
 }
 ```
+
+`visitor_sid` is only included when a valid SID is found in the payload.
 
 ---
 
@@ -144,6 +152,34 @@ Incoming webhook POST
 | `+525512345678` (MX) | `525512345678` | `+525512345678` | *(blank)* |
 
 US numbers are fully normalized. International numbers are passed through rather than dropped.
+
+---
+
+## Visitor SID Extraction
+
+If the form payload includes a CTM visitor/session SID — typically injected as a hidden field by the CTM tracking script on your website — the Lambda extracts it and returns it as `visitor_sid`. This links the form submission to the CTM visitor session that was already tracked before the form was filled out, enabling full attribution.
+
+**Recognized key names** (case-insensitive):
+
+| Key | Notes |
+|---|---|
+| `visitor_sid` | Canonical CTM field name |
+| `sid` | Short alias |
+| `ctm_visitor_sid` | Explicit CTM prefix |
+| `ctm_session_id` | Session ID variant |
+| `ctm_sid` | Short CTM variant |
+| `session_id` | Generic session key |
+| `visitor_id` / `visitorId` | Visitor ID variant |
+| `tracking_sid` | Tracking alias |
+| Any key containing `sid` + `ctm`, `visitor`, `session`, or `tracking` | Compound match |
+
+**Validation:** values must be exactly 24 lowercase hex characters (e.g. `67bf826f00002dfe4f6c5d06`). This is the format CTM uses for all session/visitor IDs.
+
+**False positive prevention:** generic ID fields like `submission_id`, `entry_id`, and `form_id` are intentionally excluded. A 24-character hex value is only promoted to `visitor_sid` if the key name signals CTM/session/visitor intent — preventing MongoDB ObjectIds or other vendor IDs from being misidentified.
+
+**Implementing the hidden field on your form:** add a hidden field named `visitor_sid` to your form and populate it with the value from the CTM tracking script on page load. When the form is submitted, the SID travels with the webhook payload and the Lambda promotes it automatically.
+
+**Deduplication:** once promoted to top-level `visitor_sid`, the field is suppressed from `custom_fields` so it does not also appear as `custom_visitor_sid`.
 
 ---
 
