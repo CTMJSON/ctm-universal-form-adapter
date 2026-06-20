@@ -325,6 +325,17 @@ function normalizeBody(body) {
     return ffFlat;
   }
 
+  // Process Street: {id, type, createdDate, data: {workflow, workflowRun, task, formFields: {...}}}
+  // body.data is in NOISE_KEYS so the entire object would otherwise be suppressed.
+  // formFields contains the actual submission data with user-defined field keys.
+  if (body.data &&
+      !Array.isArray(body.data) &&
+      body.data.formFields &&
+      typeof body.data.formFields === "object" &&
+      !Array.isArray(body.data.formFields)) {
+    return body.data.formFields;
+  }
+
   // Formidable Forms: {form_id, item_id, item_key, fields: {first_name, last_name, email, ...}}
   // fields object uses semantic string keys — return it directly
   if (body.fields &&
