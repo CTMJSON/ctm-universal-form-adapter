@@ -15,6 +15,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Tally | `data.fields[]` array with typed fields |
 | Formidable Forms | `fields` object + `item_id` key |
 | Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
+| Klaviyo | `data.attributes` object (JSON:API envelope; `custom_properties` inlined to avoid double prefix) |
 | Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
 | Process Street | `data.formFields` object (field keys are user-defined in the workflow) |
 | Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |

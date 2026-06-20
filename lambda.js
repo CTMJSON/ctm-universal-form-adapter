@@ -292,6 +292,32 @@ function normalizeBody(body) {
     return tallyFlat;
   }
 
+  // Klaviyo: {data: {type, id, attributes: {email, first_name, phone_number, custom_properties: {...}}}}
+  // Follows JSON:API envelope. body.data is in NOISE_KEYS so the entire payload is otherwise suppressed.
+  // Covers both system webhooks (profile/event) and flow webhook actions using the standard template.
+  // Inline custom_properties to avoid a "custom_custom_properties" double-prefix in the output.
+  if (body.data &&
+      !Array.isArray(body.data) &&
+      body.data.attributes &&
+      typeof body.data.attributes === "object") {
+    var kFlat = {};
+    var attrs  = body.data.attributes;
+    var akeys  = Object.keys(attrs);
+    for (i = 0; i < akeys.length; i++) {
+      var ak = akeys[i];
+      if (ak === "custom_properties" &&
+          attrs[ak] &&
+          typeof attrs[ak] === "object" &&
+          !Array.isArray(attrs[ak])) {
+        var cpkeys = Object.keys(attrs[ak]);
+        for (var cp = 0; cp < cpkeys.length; cp++) kFlat[cpkeys[cp]] = attrs[ak][cpkeys[cp]];
+      } else {
+        kFlat[ak] = attrs[ak];
+      }
+    }
+    return kFlat;
+  }
+
   // Cognito Forms: {FormId, FormName, DateSubmitted, Sequence, Fields: {FirstName, LastName, Email, ...}}
   // Capital-F Fields + DateSubmitted distinguishes from all other vendors.
   // Returning Fields directly works because keyContains() lowercases before matching,
