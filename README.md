@@ -88,16 +88,32 @@ Copy this URL — this is where your form vendor will send its webhook.
 
 Paste the Form Reactor POST URL as the webhook destination in your form tool.
 
-**Vendor-specific notes:**
+| Vendor | Webhook Setup Docs | Notes for CTM Form Reactor |
+|---|---|---|
+| ActiveCampaign | [Create a webhook](https://developers.activecampaign.com/reference/create-a-webhook) | Best fit if setting up via API/dev docs. For UI-based automations, ActiveCampaign's automation webhook action may be more relevant. |
+| Cognito Forms | [Webhooks](https://www.cognitoforms.com/support/69/entries/webhooks) | Use the CTM Form Reactor URL as the webhook endpoint. |
+| Elementor Forms | [Webhook Form Action](https://elementor.com/help/webhook-form-action/) | Best direct article for Elementor Pro Forms "Actions After Submit → Webhook." |
+| Facebook / Meta Lead Ads | [Lead Ads Webhooks](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | More technical than most form tools; requires Meta app/webhook setup. Subscribe to `leadgen` events. |
+| Fluent Forms | [Webhook Integration](https://fluentforms.com/docs/fluent-forms-webhook/) | Use this for configuring POST to the CTM Form Reactor URL. |
+| Formaloo | [Webhooks](https://help.formaloo.com/en/articles/5561274-webhooks) | Use the webhook URL destination option. Formaloo supports multiple payload formats; both are handled automatically. |
+| FormAssembly | [Webhooks Connector](https://help.formassembly.com/help/webhooks-connector) | Best article for posting submission data to an external endpoint. |
+| Formidable Forms | [API Webhooks](https://formidableforms.com/knowledgebase/form-actions/#api-webhooks) | Usually configured as a form action. |
+| Formstack | [Webhooks](https://help.formstack.com/hc/en-us/articles/360019520251-Webhooks) | Best direct setup article for Formstack Forms webhook delivery. |
+| GoFormz | [Webhooks](https://support.goformz.com/hc/en-us/articles/360045747812-Webhooks) | Add a Webhook action in GoFormz Workflows. Name your template fields semantically (e.g. `CustomerPhone`, `ContactEmail`) — the parser matches by field name. A field named `Field_23` will not be recognized. |
+| GoHighLevel | [Workflow Action: Webhook](https://help.gohighlevel.com/support/solutions/articles/155000001108-workflow-action-webhook) | Use the form's "Webhook" workflow action. Select `POST` and paste the Form Reactor URL. |
+| Gravity Forms | [Webhooks Add-On](https://docs.gravityforms.com/webhooks-add-on/) | Best official doc for sending Gravity Forms submissions to an external URL. |
+| HubSpot | [Use webhooks with workflows](https://knowledge.hubspot.com/workflows/how-do-i-use-webhooks-with-hubspot-workflows) | Best UI-oriented article if sending form/contact data from workflows. |
+| JotForm | [How to Set Up Webhooks](https://www.jotform.com/help/27-how-to-setup-webhooks/) | **Enable "Send as JSON"** in JotForm webhook settings. Without it, CTM receives `multipart/form-data` and the Lambda sees an empty body. |
+| Klaviyo | [Webhooks](https://developers.klaviyo.com/en/docs/webhooks) | Developer docs are the best fit; payload is JSON:API-style. |
+| Pipedrive | [Guide for Webhooks](https://pipedrive.readme.io/docs/guide-for-webhooks) | Subscribe to `added.deal` or `added.person` events. Contact name, email, and phone are extracted from the linked person record; company name and deal title are included as custom fields. |
+| Process Street | [Webhooks](https://www.process.st/help/docs/webhooks/) | Best article for pushing workflow/form field data to CTM. |
+| Tally | [Webhooks](https://tally.so/help/webhooks) | Straightforward: paste the CTM Form Reactor URL as the webhook endpoint. |
+| Typeform | [Webhooks](https://www.typeform.com/help/a/webhooks-360029573471/) | Enable **"Include response"** in Typeform webhook settings so the Lambda receives `form_response.answers[]`. |
+| WPForms | [Webhooks Addon](https://wpforms.com/docs/how-to-use-the-webhooks-addon-with-wpforms/) | Best official setup article for WPForms Pro webhook delivery. |
+| Wufoo | [Webhooks](https://help.wufoo.com/articles/en_US/SurveyMonkeyArticleType/Webhooks) | Enable **"Include Field and Form Structures with Entry Data"** to add `FieldNLabel` companion keys (e.g. `Field10Label: "First Name"`). Without it, name capture falls back to value scanning and may be incomplete. |
+| Zoho Forms | [Webhooks](https://help.zoho.com/portal/en/kb/forms/user-guide/form-settings/webhooks/articles/webhooks) | Best official article for Zoho Forms webhook configuration. |
 
-- **JotForm** — By default JotForm sends `multipart/form-data`, which CTM cannot parse. In your JotForm webhook settings, enable **"Send as JSON"** (or set the content type to `application/json`). Without this, the Lambda will receive an empty body. JotForm also wraps field keys in curly braces (`{name}`, `{phoneNumber12}`) — the parser strips these automatically before pattern matching.
-- **Facebook / Meta Lead Ads** — You must set up the webhook through Meta's developer portal and subscribe to `leadgen` events. The Form Reactor URL is your callback endpoint.
-- **Typeform** — In the Typeform webhook settings, enable **"Include response"** to include answer data in the payload.
-- **GoHighLevel** — Use the form's **"Webhook"** action in the workflow builder. Select `POST` and paste the Form Reactor URL.
-- **GoFormz** — In GoFormz, go to **Workflows** and add a **Webhook** action triggered on form completion, pointing to the Form Reactor URL. The parser extracts contact fields from `Data.Fields` by matching field names against common patterns (e.g., `Phone`, `ContactEmail`, `FirstName`). For reliable extraction, name your template fields semantically — a field named `CustomerPhone` will be recognized automatically; a field named `Field_23` will not. The `Owner` field (the GoFormz account user who submitted the form) is also available as a fallback email source.
-- **Pipedrive** — In Pipedrive, go to **Tools and apps → Webhooks** and create a webhook pointing to the Form Reactor URL. Subscribe to `added.deal` events to capture new leads from web forms, or `added.person` if you prefer person-based triggers. Contact name, email, and phone are extracted from the deal's linked person record; company name and deal title are included as custom fields.
-- **Wufoo** — In your Wufoo webhook settings, check **"Include Field and Form Structures with Entry Data"**. This adds `FieldNLabel` companion keys (e.g. `Field10Label: "First Name"`) alongside the opaque `FieldN` values, letting the parser map names, emails, and phone numbers correctly. Without it, field values are extracted by scanning but name capture is limited to the first field alphabetically.
-- **All others** — Paste the URL directly into the vendor's webhook or notification URL field. No additional configuration is required.
+For any vendor not listed above, paste the Form Reactor URL directly into the vendor's webhook or notification URL field. No additional configuration is required.
 
 ---
 
