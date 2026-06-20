@@ -670,6 +670,30 @@ function normalizeBody(body) {
     return hcpFlat;
   }
 
+  // ServiceTitan: {Event: {Id, Type, Timestamp}, Tenant: {...}, Data: {Customer, Revenue, ...}}
+  // All PascalCase. body.Data suppressed by NOISE_KEYS["data"]. Distinguish from GoFormz
+  // (body.Data.Fields) and Housecall Pro (body.event string) by checking that body.Event
+  // is an object and body.Data.Customer is present.
+  if (body.Event && typeof body.Event === "object" &&
+      body.Data && typeof body.Data === "object" &&
+      body.Data.Customer && typeof body.Data.Customer === "object") {
+    var stData = body.Data;
+    var stCust = stData.Customer;
+    var stFlat = {};
+    if (stCust.Name)  stFlat.name  = stCust.Name;
+    if (stCust.Email) stFlat.email = stCust.Email;
+    if (stCust.Phone) stFlat.phone = stCust.Phone;
+    if (stData.JobNumber) stFlat.job_number = stData.JobNumber;
+    if (stData.Status)    stFlat.job_status = stData.Status;
+    if (stData.Revenue && stData.Revenue.Total !== undefined)
+      stFlat.job_total = stData.Revenue.Total;
+    if (stData.Technician && stData.Technician.Name)
+      stFlat.technician_name = stData.Technician.Name;
+    if (body.Tenant && body.Tenant.Name)
+      stFlat.company = body.Tenant.Name;
+    return stFlat;
+  }
+
   // Generic / unknown vendor — return as-is
   return body;
 }

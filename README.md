@@ -30,6 +30,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | [Klaviyo](https://developers.klaviyo.com/en/docs/webhooks) | `data.attributes` object (JSON:API envelope; `custom_properties` inlined) | Developer docs are the best fit; payload is JSON:API-style. |
 | [Pipedrive](https://pipedrive.readme.io/docs/guide-for-webhooks) | `current` + `meta.action` envelope; contact from `current.person_id` (deal) or `current` (person) | Subscribe to `added.deal` or `added.person` events. Company name and deal title are included as custom fields. |
 | [Process Street](https://www.process.st/help/docs/webhooks/) | `data.formFields` object (field keys are user-defined in the workflow) | Best article for pushing workflow/form field data to CTM. |
+| [ServiceTitan](https://help.servicetitan.com/docs/set-up-scheduling-pro-webhooks) | `Event` object + `Data.Customer` (PascalCase; `Data` suppressed in generic path) | Job number, status, total revenue, and assigned technician are included as custom fields. |
 | [Tally](https://tally.so/help/webhooks) | `data.fields[]` array with typed fields | Paste the CTM Form Reactor URL as the webhook endpoint. |
 | [Typeform](https://www.typeform.com/help/a/webhooks-360029573471/) | `form_response.answers[]` with definition mapping | Enable **"Include response"** so the Lambda receives `form_response.answers[]`. |
 | [WPForms](https://wpforms.com/docs/how-to-use-the-webhooks-addon-with-wpforms/) | `fields` object + `meta` object | Requires WPForms Pro with the Webhooks addon. |
