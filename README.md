@@ -20,6 +20,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Formstack | `fields` object of `{label, value}` descriptors + `Form` object (capital F) |
 | Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
 | GoHighLevel | `type: "FormSubmission"` + `contact` object |
+| Pipedrive | `current` + `meta.action` envelope; extracts contact from `current.person_id` (deal) or `current` (person) |
 | Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | HubSpot | Form submission `{submittedAt, data: [{name,value}]}` or contact webhook `[{properties:{}}]` |
 | JotForm | `rawRequest` field (requires JSON webhook config — see note below) |
@@ -92,6 +93,7 @@ Paste the Form Reactor POST URL as the webhook destination in your form tool.
 - **Facebook / Meta Lead Ads** — You must set up the webhook through Meta's developer portal and subscribe to `leadgen` events. The Form Reactor URL is your callback endpoint.
 - **Typeform** — In the Typeform webhook settings, enable **"Include response"** to include answer data in the payload.
 - **GoHighLevel** — Use the form's **"Webhook"** action in the workflow builder. Select `POST` and paste the Form Reactor URL.
+- **Pipedrive** — In Pipedrive, go to **Tools and apps → Webhooks** and create a webhook pointing to the Form Reactor URL. Subscribe to `added.deal` events to capture new leads from web forms, or `added.person` if you prefer person-based triggers. Contact name, email, and phone are extracted from the deal's linked person record; company name and deal title are included as custom fields.
 - **Wufoo** — In your Wufoo webhook settings, check **"Include Field and Form Structures with Entry Data"**. This adds `FieldNLabel` companion keys (e.g. `Field10Label: "First Name"`) alongside the opaque `FieldN` values, letting the parser map names, emails, and phone numbers correctly. Without it, field values are extracted by scanning but name capture is limited to the first field alphabetically.
 - **All others** — Paste the URL directly into the vendor's webhook or notification URL field. No additional configuration is required.
 

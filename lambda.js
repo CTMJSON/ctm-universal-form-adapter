@@ -527,6 +527,47 @@ function normalizeBody(body) {
     return inferHints(wfFlat);
   }
 
+  // Pipedrive: {event, meta, current, previous} envelope.
+  // Deal webhooks nest the contact in current.person_id; person webhooks
+  // put name/email/phone directly on current. Email and phone are arrays
+  // of {label, value, primary} — pick the primary entry.
+  if (body.current && body.meta && body.meta.action) {
+    var pdPerson = (body.current.person_id &&
+                    typeof body.current.person_id === "object" &&
+                    body.current.person_id.name)
+                   ? body.current.person_id : body.current;
+    var pdFlat = {};
+    var pdArr, pdPicked, pdpi;
+
+    if (pdPerson.name) pdFlat.name = pdPerson.name;
+
+    pdArr = pdPerson.email;
+    pdPicked = "";
+    if (Array.isArray(pdArr)) {
+      for (pdpi = 0; pdpi < pdArr.length; pdpi++) {
+        if (pdArr[pdpi].primary && pdArr[pdpi].value) { pdPicked = trimValue(pdArr[pdpi].value); break; }
+      }
+      if (!pdPicked && pdArr[0] && pdArr[0].value) pdPicked = trimValue(pdArr[0].value);
+    }
+    if (pdPicked) pdFlat.email = pdPicked;
+
+    pdArr = pdPerson.phone;
+    pdPicked = "";
+    if (Array.isArray(pdArr)) {
+      for (pdpi = 0; pdpi < pdArr.length; pdpi++) {
+        if (pdArr[pdpi].primary && pdArr[pdpi].value) { pdPicked = trimValue(pdArr[pdpi].value); break; }
+      }
+      if (!pdPicked && pdArr[0] && pdArr[0].value) pdPicked = trimValue(pdArr[0].value);
+    }
+    if (pdPicked) pdFlat.phone = pdPicked;
+
+    if (body.current.org_id && body.current.org_id.name)
+      pdFlat.company = body.current.org_id.name;
+    if (body.current.title) pdFlat.deal_title = body.current.title;
+
+    return pdFlat;
+  }
+
   // Generic / unknown vendor — return as-is
   return body;
 }
