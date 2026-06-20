@@ -43,7 +43,7 @@ Even for unrecognized vendors, the parser scans field names and values to match 
 ### Step 1 — Create the Lambda in CTM
 
 1. Log in to [CTM](https://app.calltrackingmetrics.com) and go to your account.
-2. Navigate to **Account → Integrations → Lambda Functions**.
+2. Navigate to **Flows → Lambdas from the left Nav**.
    - Direct link: `https://app.calltrackingmetrics.com/accounts/YOUR_ACCOUNT_ID/lambdas`
    - Full setup guide: [CTM Lambda Functions](https://calltrackingmetrics.zendesk.com/hc/en-us/articles/6603700875661-CTM-Lambda-Functions)
 3. Click **New Lambda Function**.
@@ -59,7 +59,7 @@ Even for unrecognized vendors, the parser scans field names and values to match 
 
 A Form Reactor is the CTM construct that receives a webhook POST and routes it to a tracking number. You need one per form (or one shared reactor if all your forms go to the same number).
 
-1. Navigate to **Account → Integrations → Form Reactors**.
+1. Navigate to **Flows → FormReactor from the left Nav**.
    - Full setup guide: [CTM Form Reactors](https://calltrackingmetrics.zendesk.com/hc/en-us/articles/6423010132877-Click-to-Call-Form-FormReactors)
 2. Click **New Form Reactor**.
 3. Configure:
