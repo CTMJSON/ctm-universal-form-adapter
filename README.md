@@ -54,6 +54,8 @@ A Form Reactor is the CTM construct that receives a webhook POST and routes it t
    - **Name** — something identifiable, e.g. `Contact Page Form`
    - **Tracking Number** — the CTM number that will receive calls/texts triggered by this form
    - **Inbound Form Parser** — select the Lambda you created in Step 1
+   <img width="1623" height="335" alt="Screenshot 2026-06-20 at 7 08 00 AM" src="https://github.com/user-attachments/assets/7a8f7db9-024b-4b35-bfa3-e8f7da160d76" />
+
 4. Click **Save**.
 
 ---
