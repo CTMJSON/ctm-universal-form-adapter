@@ -11,6 +11,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Vendor | Detection Method | Notes for CTM Form Reactor |
 |---|---|---|
 | [ActiveCampaign](https://developers.activecampaign.com/reference/create-a-webhook) | `contact` object with `{email, first_name, last_name, phone}` | Best fit if setting up via API/dev docs. For UI-based automations, ActiveCampaign's automation webhook action may be more relevant. |
+| [ClickFunnels](https://developers.myclickfunnels.com/docs/webhooks) | `event.type` + `data.funnel_id` (data suppressed in generic path) | Select **JSON** as the adapter in ClickFunnels webhook settings — not "Form Data." |
 | [Cognito Forms](https://www.cognitoforms.com/support/69/entries/webhooks) | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) | Use the CTM Form Reactor URL as the webhook endpoint. |
 | [Elementor Forms](https://elementor.com/help/webhook-form-action/) | `form_fields` object | Elementor Pro Forms: "Actions After Submit → Webhook." |
 | [Facebook / Meta Lead Ads](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | `object: "page"` + `entry[].changes[].value.field_data[]` | Requires Meta app/webhook setup. Subscribe to `leadgen` events. |

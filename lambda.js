@@ -582,6 +582,20 @@ function normalizeBody(body) {
     return pdFlat;
   }
 
+  // ClickFunnels: {event: {type, ...}, data: {first_name, last_name, email, phone, ...}}
+  // body.data is suppressed by NOISE_KEYS["data"] in the generic path, swallowing all
+  // contact fields. The data object already has semantic keys — return it directly after
+  // stripping internal IDs and timestamps. funnel_id is ClickFunnels-specific.
+  if (body.event && body.data && body.event.type && body.data.funnel_id !== undefined) {
+    var CF_SKIP = { id: 1, contact_id: 1, funnel_id: 1, page_id: 1, ip_address: 1, created_at: 1, updated_at: 1 };
+    var cfFlat = {};
+    var cfKeys = Object.keys(body.data);
+    for (i = 0; i < cfKeys.length; i++) {
+      if (!CF_SKIP[cfKeys[i]]) cfFlat[cfKeys[i]] = body.data[cfKeys[i]];
+    }
+    return cfFlat;
+  }
+
   // Generic / unknown vendor — return as-is
   return body;
 }
