@@ -65,6 +65,33 @@ function looksLikeEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimValue(value));
 }
 
+function looksLikeVisitorSid(value) {
+  return /^[a-f0-9]{24}$/i.test(trimValue(value));
+}
+
+// Match keys that plausibly carry a CTM visitor/session SID.
+// Intentionally excludes generic IDs like submission_id, entry_id, form_id
+// to avoid false-positives from Mongo/ObjectId-style values in other fields.
+function keyLooksLikeVisitorSid(key) {
+  var lower = key.toLowerCase();
+  if (lower === "sid" ||
+      lower === "visitor_sid" ||
+      lower === "ctm_session_id" ||
+      lower === "ctm_visitor_sid" ||
+      lower === "ctm_sid" ||
+      lower === "session_id" ||
+      lower === "visitor_id" ||
+      lower === "visitorid" ||
+      lower === "tracking_sid") return true;
+  // Also match compound keys that combine ctm/visitor/session/tracking with sid
+  return lower.indexOf("sid") !== -1 && (
+    lower.indexOf("ctm")      !== -1 ||
+    lower.indexOf("visitor")  !== -1 ||
+    lower.indexOf("session")  !== -1 ||
+    lower.indexOf("tracking") !== -1
+  );
+}
+
 function parseUrlEncoded(str) {
   var result = {};
   var pairs = str.split("&");
@@ -420,6 +447,7 @@ exports.handler = function(event, context) {
     var lastName    = "";
     var email       = "";
     var phoneSource = "";
+    var visitorSid  = "";
 
     var allKeys = Object.keys(body);
     var i, key, resolved;
@@ -458,6 +486,11 @@ exports.handler = function(event, context) {
           keyContains(key, ["phone", "mobile", "cell", "tel", "callback"]) &&
           looksLikePhone(resolved))
         phoneSource = resolved;
+
+      if (!visitorSid && keyLooksLikeVisitorSid(key)) {
+        var sidCandidate = resolved || flattenValue(body[key]);
+        if (looksLikeVisitorSid(sidCandidate)) visitorSid = trimValue(sidCandidate);
+      }
     }
 
     // Combine first + last; normalize whitespace on all name results
@@ -489,6 +522,13 @@ exports.handler = function(event, context) {
       key = allKeys[i];
       if (NOISE_KEYS[key.toLowerCase()]) continue;
 
+      // Skip fields already promoted to top-level visitor_sid
+      if (visitorSid && keyLooksLikeVisitorSid(key)) {
+        var sidFlat = flattenValue(body[key]);
+        if (looksLikeVisitorSid(sidFlat) && trimValue(sidFlat).toLowerCase() === visitorSid.toLowerCase())
+          continue;
+      }
+
       var flat = flattenValue(body[key]);
       if (!flat) continue;
       if (isNoisyValue(flat)) continue;
@@ -515,6 +555,7 @@ exports.handler = function(event, context) {
 
     if (callerName)                       payload.caller_name   = callerName;
     if (email)                            payload.email         = email;
+    if (visitorSid)                       payload.visitor_sid   = visitorSid;
     if (Object.keys(customFields).length) payload.custom_fields = customFields;
 
     context.done(null, payload);
