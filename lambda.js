@@ -7,6 +7,25 @@ function normalizeWhitespace(str) {
   return str.replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
 }
 
+// Some vendors (JotForm variable-substitution keys) wrap field names in {braces}.
+// Strip them so pattern matching works: {name} → name, {phoneNumber12} → phoneNumber12
+function sanitizeKeys(body) {
+  var keys = Object.keys(body);
+  var dirty = false;
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i].charAt(0) === "{" || keys[i].charAt(keys[i].length - 1) === "}") {
+      dirty = true; break;
+    }
+  }
+  if (!dirty) return body;
+  var clean = {};
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i].replace(/^\{|\}$/g, "");
+    clean[k] = body[keys[i]];
+  }
+  return clean;
+}
+
 function digitsOnly(value) {
   return trimValue(value).replace(/\D+/g, "");
 }
@@ -162,7 +181,6 @@ function normalizeBody(body) {
                   : trimValue(fd.values);
         if (fdk && fdv) fbFlat[fdk] = fdv;
       }
-      // Ad attribution — valuable for CTM paid attribution reporting
       if (fbValue.ad_id)       fbFlat["ad_id"]       = String(fbValue.ad_id);
       if (fbValue.adgroup_id)  fbFlat["adgroup_id"]  = String(fbValue.adgroup_id);
       if (fbValue.campaign_id) fbFlat["campaign_id"] = String(fbValue.campaign_id);
@@ -395,7 +413,7 @@ function isNoisyValue(val) {
 exports.handler = function(event, context) {
   try {
     var raw  = parseBody(event);
-    var body = normalizeBody(raw);
+    var body = sanitizeKeys(normalizeBody(raw));
 
     var callerName  = "";
     var firstName   = "";
@@ -435,7 +453,7 @@ exports.handler = function(event, context) {
       if (!email && key === "__email_hint")
         email = resolved.toLowerCase();
 
-      // Added "callback" to catch "callback number" field labels
+      // "callback" catches "callback number" style labels
       if (!phoneSource &&
           keyContains(key, ["phone", "mobile", "cell", "tel", "callback"]) &&
           looksLikePhone(resolved))
