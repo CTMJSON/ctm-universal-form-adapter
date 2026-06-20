@@ -549,6 +549,26 @@ function normalizeBody(body) {
     return inferHints(wfFlat);
   }
 
+  // WooCommerce order: billing/shipping objects nested inside order payload.
+  // resolveString(body.billing) returns "" (no .value key), so all contact
+  // data is unreachable in generic path — flattenValue produces a garbled
+  // concatenation. order_key (wc_order_...) is WooCommerce-specific.
+  // customer.created webhooks have first_name/email at top level and work
+  // without hardening; only order.created needs this branch.
+  if (body.billing && typeof body.billing === "object" && body.order_key !== undefined) {
+    var wcb = body.billing;
+    var wcFlat = {};
+    if (wcb.first_name)     wcFlat.first_name     = wcb.first_name;
+    if (wcb.last_name)      wcFlat.last_name      = wcb.last_name;
+    if (wcb.email)          wcFlat.email          = wcb.email;
+    if (wcb.phone)          wcFlat.phone          = wcb.phone;
+    if (wcb.company)        wcFlat.company        = wcb.company;
+    if (body.customer_note) wcFlat.customer_note  = body.customer_note;
+    if (body.status)        wcFlat.order_status   = body.status;
+    if (body.total)         wcFlat.order_total    = body.total;
+    return wcFlat;
+  }
+
   // GoFormz: {Event, Timestamp, Data: {Fields: {...}, Owner, ...}} envelope.
   // Data (capital D) is suppressed by NOISE_KEYS["data"] in the generic path,
   // swallowing all field content. Fields contains user-defined form field keys —
