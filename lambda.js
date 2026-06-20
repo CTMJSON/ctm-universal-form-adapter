@@ -638,6 +638,38 @@ function normalizeBody(body) {
     return cfFlat;
   }
 
+  // Housecall Pro: {event: "job.completed", data: {customer: {...}, invoice: {...}, ...}}
+  // body.data is suppressed by NOISE_KEYS["data"]. body.event is a plain string here
+  // (not an object like ClickFunnels), so body.event.type is undefined and ClickFunnels
+  // branch doesn't fire. Extract customer + invoice + schedule into a flat object;
+  // mobile_number triggers keyContains("mobile") automatically.
+  if (body.event && typeof body.event === "string" &&
+      body.data && typeof body.data === "object" &&
+      body.data.customer && typeof body.data.customer === "object") {
+    var hcp     = body.data;
+    var hcpCust = hcp.customer;
+    var hcpFlat = {};
+    if (hcpCust.first_name)    hcpFlat.first_name    = hcpCust.first_name;
+    if (hcpCust.last_name)     hcpFlat.last_name     = hcpCust.last_name;
+    if (hcpCust.email)         hcpFlat.email         = hcpCust.email;
+    if (hcpCust.mobile_number) hcpFlat.mobile_number = hcpCust.mobile_number;
+    if (hcp.invoice && typeof hcp.invoice === "object") {
+      if (hcp.invoice.invoice_number) hcpFlat.invoice_number = hcp.invoice.invoice_number;
+      if (hcp.invoice.total     !== undefined) hcpFlat.invoice_total = hcp.invoice.total;
+      if (hcp.invoice.balance_due !== undefined) hcpFlat.balance_due = hcp.invoice.balance_due;
+    }
+    if (hcp.job_number !== undefined) hcpFlat.job_number = hcp.job_number;
+    if (hcp.status)   hcpFlat.job_status    = hcp.status;
+    if (hcp.schedule && hcp.schedule.arrival_window)
+      hcpFlat.arrival_window = hcp.schedule.arrival_window;
+    if (Array.isArray(hcp.assigned_employees) && hcp.assigned_employees[0]) {
+      var hcpTech = hcp.assigned_employees[0];
+      var hcpTechName = [trimValue(hcpTech.first_name || ""), trimValue(hcpTech.last_name || "")].filter(Boolean).join(" ");
+      if (hcpTechName) hcpFlat.technician_name = hcpTechName;
+    }
+    return hcpFlat;
+  }
+
   // Generic / unknown vendor — return as-is
   return body;
 }
