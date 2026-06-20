@@ -10,23 +10,24 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 
 | Vendor | Detection Method |
 |---|---|
-| Zoho Forms | `phone_number` key + `Field_N` pattern |
-| JotForm | `rawRequest` field (requires JSON webhook config — see note below) |
-| Tally | `data.fields[]` array with typed fields |
-| Formidable Forms | `fields` object + `item_id` key |
-| Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
-| Klaviyo | `data.attributes` object (JSON:API envelope; `custom_properties` inlined to avoid double prefix) |
+| ActiveCampaign | `contact` object with `{email, first_name, last_name, phone}` |
 | Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
-| Process Street | `data.formFields` object (field keys are user-defined in the workflow) |
-| Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |
-| Formstack | `fields` object of `{label, value}` descriptors keyed by field ID (`body.Form` confirms vendor) |
-| WPForms | `fields` object + `meta` object |
-| Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | Elementor Forms | `form_fields` object |
-| Typeform | `form_response.answers[]` with definition mapping |
-| GoHighLevel | `type: "FormSubmission"` + `contact` object |
 | Facebook / Meta Lead Ads | `object: "page"` + `entry[].changes[].value.field_data[]` |
+| Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |
+| Formidable Forms | `fields` object + `item_id` key |
+| Formstack | `fields` object of `{label, value}` descriptors + `Form` object (capital F) |
+| Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
+| GoHighLevel | `type: "FormSubmission"` + `contact` object |
+| Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | HubSpot | Form submission `{submittedAt, data: [{name,value}]}` or contact webhook `[{properties:{}}]` |
+| JotForm | `rawRequest` field (requires JSON webhook config — see note below) |
+| Klaviyo | `data.attributes` object (JSON:API envelope; `custom_properties` inlined) |
+| Process Street | `data.formFields` object (field keys are user-defined in the workflow) |
+| Tally | `data.fields[]` array with typed fields |
+| Typeform | `form_response.answers[]` with definition mapping |
+| WPForms | `fields` object + `meta` object |
+| Zoho Forms | `phone_number` key + `Field_N` pattern |
 | **Any other JSON vendor** | Generic fallback: scans all keys and values for phone, email, and name patterns |
 
 Even for unrecognized vendors, the parser scans field names and values to match phone numbers, email addresses, and names automatically. Any JSON webhook with a phone number in it should produce a valid CTM activity.

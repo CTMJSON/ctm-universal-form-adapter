@@ -232,6 +232,16 @@ function normalizeBody(body) {
     return ghlFlat;
   }
 
+  // ActiveCampaign: {type: "subscribe"|"unsubscribe"|..., contact: {email, first_name, last_name, phone, ...}}
+  // body.contact is in NOISE_KEYS so all lead data is suppressed by the generic fallback.
+  // GHL (above) already handles body.contact when body.type === "FormSubmission";
+  // this catches all remaining AC event types.
+  if (body.contact &&
+      typeof body.contact === "object" &&
+      !Array.isArray(body.contact)) {
+    return body.contact;
+  }
+
   // Elementor
   if (body.form_fields &&
       typeof body.form_fields === "object" &&
