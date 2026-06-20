@@ -28,6 +28,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Tally | `data.fields[]` array with typed fields |
 | Typeform | `form_response.answers[]` with definition mapping |
 | WPForms | `fields` object + `meta` object |
+| Wufoo | `MachineName` key; maps `FieldNLabel` → value when field structures included |
 | Zoho Forms | `phone_number` key + `Field_N` pattern |
 | **Any other JSON vendor** | Generic fallback: scans all keys and values for phone, email, and name patterns |
 
@@ -91,6 +92,7 @@ Paste the Form Reactor POST URL as the webhook destination in your form tool.
 - **Facebook / Meta Lead Ads** — You must set up the webhook through Meta's developer portal and subscribe to `leadgen` events. The Form Reactor URL is your callback endpoint.
 - **Typeform** — In the Typeform webhook settings, enable **"Include response"** to include answer data in the payload.
 - **GoHighLevel** — Use the form's **"Webhook"** action in the workflow builder. Select `POST` and paste the Form Reactor URL.
+- **Wufoo** — In your Wufoo webhook settings, check **"Include Field and Form Structures with Entry Data"**. This adds `FieldNLabel` companion keys (e.g. `Field10Label: "First Name"`) alongside the opaque `FieldN` values, letting the parser map names, emails, and phone numbers correctly. Without it, field values are extracted by scanning but name capture is limited to the first field alphabetically.
 - **All others** — Paste the URL directly into the vendor's webhook or notification URL field. No additional configuration is required.
 
 ---

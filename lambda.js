@@ -499,6 +499,34 @@ function normalizeBody(body) {
     return inferHints(zohoFlat);
   }
 
+  // Wufoo: URL-encoded or JSON payload with MachineName + opaque FieldN keys (no underscore).
+  // Differs from Zoho (Field_N with underscore). When "Include Field and Form Structures"
+  // is enabled in Wufoo, companion FieldNLabel keys carry the human field label — use those
+  // as semantic keys so keyContains() patterns fire correctly.
+  if (body.MachineName !== undefined) {
+    var WF_NOISE = { machinename: 1, datecreated: 1, handshakekey: 1, createdby: 1, entryid: 1 };
+    var wfValues = {};
+    var wfLabels = {};
+    var wfFlat   = {};
+    var wufooKeys = Object.keys(body);
+    var wm;
+    for (i = 0; i < wufooKeys.length; i++) {
+      var wk = wufooKeys[i];
+      if (WF_NOISE[wk.toLowerCase()]) continue;
+      wm = wk.match(/^(Field\d+)Label$/i);
+      if (wm) { wfLabels[wm[1].toLowerCase()] = trimValue(body[wk]); continue; }
+      wm = wk.match(/^Field\d+$/i);
+      if (wm) { wfValues[wk.toLowerCase()] = body[wk]; continue; }
+      wfFlat[wk] = body[wk];
+    }
+    var wfIds = Object.keys(wfValues);
+    for (i = 0; i < wfIds.length; i++) {
+      var wfId = wfIds[i];
+      wfFlat[wfLabels[wfId] || wfId] = wfValues[wfId];
+    }
+    return inferHints(wfFlat);
+  }
+
   // Generic / unknown vendor — return as-is
   return body;
 }
