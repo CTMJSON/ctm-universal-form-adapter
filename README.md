@@ -159,6 +159,32 @@ US numbers are fully normalized. International numbers are passed through rather
 
 If the form payload includes a CTM visitor/session SID — typically injected as a hidden field by the CTM tracking script on your website — the Lambda extracts it and returns it as `visitor_sid`. This links the form submission to the CTM visitor session that was already tracked before the form was filled out, enabling full attribution.
 
+### Simple website example
+
+Add a hidden field to your form:
+
+```html
+<input type="hidden" name="visitor_sid" id="your_hidden_field_id" value="">
+
+Then populate it after the CTM tracking script loads:
+
+<script>
+window.__ctm_loaded = window.__ctm_loaded || [];
+
+window.__ctm_loaded.push(function () {
+  var field = document.getElementById("your_hidden_field_id");
+
+  if (
+    field &&
+    window.__ctm &&
+    __ctm.config &&
+    __ctm.config.sid
+  ) {
+    field.value = __ctm.config.sid;
+  }
+});
+</script>
+
 **Recognized key names** (case-insensitive):
 
 | Key | Notes |
