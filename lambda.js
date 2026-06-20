@@ -429,6 +429,28 @@ function normalizeBody(body) {
     return body.fields;
   }
 
+  // Contact Form 7: requires a webhook plugin (CF7 Apps, RT Webhook, etc.).
+  // Without this branch, CF7 false-positives into WPForms (both have fields + meta),
+  // causing inferHints to pick up "Yes" (from newsletter_consent) as the name hint.
+  // CF7 uses "your-{fieldname}" default naming — strip the prefix and convert hyphens
+  // to underscores so keyContains() patterns fire: your-name→name, your-email→email,
+  // your-first-name→first_name. page_url / submission_date are CF7-middleware specific.
+  if (body.fields &&
+      typeof body.fields === "object" &&
+      !Array.isArray(body.fields) &&
+      body.meta &&
+      (body.page_url !== undefined || body.submission_date !== undefined)) {
+    var cf7Fields = body.fields;
+    var cf7Flat   = {};
+    var cf7Keys   = Object.keys(cf7Fields);
+    for (i = 0; i < cf7Keys.length; i++) {
+      var cf7k   = cf7Keys[i];
+      var cf7Key = cf7k.replace(/^your-/i, "").replace(/-/g, "_");
+      cf7Flat[cf7Key] = cf7Fields[cf7k];
+    }
+    return cf7Flat;
+  }
+
   // WPForms: {form_id, form_name, fields: {"1": ..., "2": ...}, meta: {...}}
   if (body.fields &&
       typeof body.fields === "object" &&
