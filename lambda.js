@@ -392,6 +392,15 @@ function normalizeBody(body) {
     return body.data.formFields;
   }
 
+  // FormAssembly: {submission_id, form_id, timestamp, metadata: {...}, form_data: {first_name, last_name, email, ...}}
+  // form_data holds all submission fields with semantic keys. Generic fallback flattens
+  // the entire object into one garbled string so name/email/phone are never pattern-matched.
+  if (body.form_data &&
+      typeof body.form_data === "object" &&
+      !Array.isArray(body.form_data)) {
+    return body.form_data;
+  }
+
   // Formstack: {Form: {id, name, url}, Submission: {id, timestamp}, fields: {"11223344": {name, label, value}}}
   // fields values are descriptor objects, not raw values; body.Form (capital F) confirms vendor.
   // Use label as the key — it produces human-readable strings that match our key patterns directly.

@@ -14,6 +14,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
 | Elementor Forms | `form_fields` object |
 | Facebook / Meta Lead Ads | `object: "page"` + `entry[].changes[].value.field_data[]` |
+| FormAssembly | `form_data` object with semantic field keys |
 | Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |
 | Formidable Forms | `fields` object + `item_id` key |
 | Formstack | `fields` object of `{label, value}` descriptors + `Form` object (capital F) |
