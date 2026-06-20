@@ -292,6 +292,28 @@ function normalizeBody(body) {
     return tallyFlat;
   }
 
+  // Fluent Forms: {form_id, form_title, submission_id, inputs: {names: {first_name, last_name}, email, ...}}
+  // inputs is a mixed object — some values are nested (names) and some are flat strings
+  if (body.inputs &&
+      typeof body.inputs === "object" &&
+      !Array.isArray(body.inputs)) {
+    var ffFlat = {};
+    var inputKeys = Object.keys(body.inputs);
+    for (i = 0; i < inputKeys.length; i++) {
+      var ik = inputKeys[i];
+      var iv = body.inputs[ik];
+      // Resolve the nested names object into a single full_name key
+      if (ik === "names" && iv && typeof iv === "object") {
+        var fn = trimValue(iv.first_name || iv.first || "");
+        var ln = trimValue(iv.last_name  || iv.last  || "");
+        if (fn || ln) ffFlat["full_name"] = normalizeWhitespace(fn + " " + ln);
+      } else {
+        ffFlat[ik] = iv;
+      }
+    }
+    return ffFlat;
+  }
+
   // Formidable Forms: {form_id, item_id, item_key, fields: {first_name, last_name, email, ...}}
   // fields object uses semantic string keys — return it directly
   if (body.fields &&

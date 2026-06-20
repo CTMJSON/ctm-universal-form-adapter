@@ -14,6 +14,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | JotForm | `rawRequest` field (requires JSON webhook config — see note below) |
 | Tally | `data.fields[]` array with typed fields |
 | Formidable Forms | `fields` object + `item_id` key |
+| Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
 | WPForms | `fields` object + `meta` object |
 | Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | Elementor Forms | `form_fields` object |
