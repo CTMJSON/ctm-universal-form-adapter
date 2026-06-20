@@ -8,31 +8,31 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 
 **Natively recognized vendors:**
 
-| Vendor | Detection Method |
-|---|---|
-| ActiveCampaign | `contact` object with `{email, first_name, last_name, phone}` |
-| Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
-| Elementor Forms | `form_fields` object |
-| Facebook / Meta Lead Ads | `object: "page"` + `entry[].changes[].value.field_data[]` |
-| FormAssembly | `form_data` object with semantic field keys |
-| Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |
-| Formidable Forms | `fields` object + `item_id` key |
-| Formstack | `fields` object of `{label, value}` descriptors + `Form` object (capital F) |
-| Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
-| GoFormz | `Data.Fields` object + `Event` key (PascalCase envelope; `Data` suppressed in generic path) |
-| GoHighLevel | `type: "FormSubmission"` + `contact` object |
-| Pipedrive | `current` + `meta.action` envelope; extracts contact from `current.person_id` (deal) or `current` (person) |
-| Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
-| HubSpot | Form submission `{submittedAt, data: [{name,value}]}` or contact webhook `[{properties:{}}]` |
-| JotForm | `rawRequest` field (requires JSON webhook config — see note below) |
-| Klaviyo | `data.attributes` object (JSON:API envelope; `custom_properties` inlined) |
-| Process Street | `data.formFields` object (field keys are user-defined in the workflow) |
-| Tally | `data.fields[]` array with typed fields |
-| Typeform | `form_response.answers[]` with definition mapping |
-| WPForms | `fields` object + `meta` object |
-| Wufoo | `MachineName` key; maps `FieldNLabel` → value when field structures included |
-| Zoho Forms | `phone_number` key + `Field_N` pattern |
-| **Any other JSON vendor** | Generic fallback: scans all keys and values for phone, email, and name patterns |
+| Vendor | Detection Method | Notes for CTM Form Reactor |
+|---|---|---|
+| [ActiveCampaign](https://developers.activecampaign.com/reference/create-a-webhook) | `contact` object with `{email, first_name, last_name, phone}` | Best fit if setting up via API/dev docs. For UI-based automations, ActiveCampaign's automation webhook action may be more relevant. |
+| [Cognito Forms](https://www.cognitoforms.com/support/69/entries/webhooks) | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) | Use the CTM Form Reactor URL as the webhook endpoint. |
+| [Elementor Forms](https://elementor.com/help/webhook-form-action/) | `form_fields` object | Elementor Pro Forms: "Actions After Submit → Webhook." |
+| [Facebook / Meta Lead Ads](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | `object: "page"` + `entry[].changes[].value.field_data[]` | Requires Meta app/webhook setup. Subscribe to `leadgen` events. |
+| [FormAssembly](https://help.formassembly.com/help/webhooks-connector) | `form_data` object with semantic field keys | Best article for posting submission data to an external endpoint. |
+| [Formaloo](https://help.formaloo.com/en/articles/5561274-webhooks) | `readable_data` object or `rendered_data` array (both formats handled) | Both payload formats are detected and handled automatically. |
+| [Formidable Forms](https://formidableforms.com/knowledgebase/form-actions/#api-webhooks) | `fields` object + `item_id` key | Configured as a form action in Formidable. |
+| [Formstack](https://help.formstack.com/hc/en-us/articles/360019520251-Webhooks) | `fields` object of `{label, value}` descriptors + `Form` object (capital F) | Use the CTM Form Reactor URL as the webhook endpoint. |
+| [Fluent Forms](https://fluentforms.com/docs/fluent-forms-webhook/) | `inputs` object (resolves nested `names.first_name/last_name`) | Use this for configuring POST to the CTM Form Reactor URL. |
+| [GoFormz](https://support.goformz.com/hc/en-us/articles/360045747812-Webhooks) | `Data.Fields` object + `Event` key (PascalCase envelope) | Add a Webhook action in GoFormz Workflows. Name template fields semantically (e.g. `CustomerPhone`, `ContactEmail`) — a field named `Field_23` will not be recognized. |
+| [GoHighLevel](https://help.gohighlevel.com/support/solutions/articles/155000001108-workflow-action-webhook) | `type: "FormSubmission"` + `contact` object | Use the "Webhook" workflow action. Select `POST` and paste the Form Reactor URL. |
+| [Gravity Forms](https://docs.gravityforms.com/webhooks-add-on/) | `form_id` + `date_created` + numeric top-level keys | Requires the Gravity Forms Webhooks Add-On. |
+| [HubSpot](https://knowledge.hubspot.com/workflows/how-do-i-use-webhooks-with-hubspot-workflows) | Form submission `{submittedAt, data: [{name,value}]}` or contact webhook `[{properties:{}}]` | Best UI-oriented article if sending form/contact data from workflows. |
+| [JotForm](https://www.jotform.com/help/27-how-to-setup-webhooks/) | `rawRequest` field | **Enable "Send as JSON"** in JotForm webhook settings. Without it, CTM receives `multipart/form-data` and the Lambda sees an empty body. |
+| [Klaviyo](https://developers.klaviyo.com/en/docs/webhooks) | `data.attributes` object (JSON:API envelope; `custom_properties` inlined) | Developer docs are the best fit; payload is JSON:API-style. |
+| [Pipedrive](https://pipedrive.readme.io/docs/guide-for-webhooks) | `current` + `meta.action` envelope; contact from `current.person_id` (deal) or `current` (person) | Subscribe to `added.deal` or `added.person` events. Company name and deal title are included as custom fields. |
+| [Process Street](https://www.process.st/help/docs/webhooks/) | `data.formFields` object (field keys are user-defined in the workflow) | Best article for pushing workflow/form field data to CTM. |
+| [Tally](https://tally.so/help/webhooks) | `data.fields[]` array with typed fields | Paste the CTM Form Reactor URL as the webhook endpoint. |
+| [Typeform](https://www.typeform.com/help/a/webhooks-360029573471/) | `form_response.answers[]` with definition mapping | Enable **"Include response"** so the Lambda receives `form_response.answers[]`. |
+| [WPForms](https://wpforms.com/docs/how-to-use-the-webhooks-addon-with-wpforms/) | `fields` object + `meta` object | Requires WPForms Pro with the Webhooks addon. |
+| [Wufoo](https://help.wufoo.com/articles/en_US/SurveyMonkeyArticleType/Webhooks) | `MachineName` key; maps `FieldNLabel` → value when field structures included | Enable **"Include Field and Form Structures with Entry Data"** to add `FieldNLabel` companion keys. Without it, name capture falls back to value scanning and may be incomplete. |
+| [Zoho Forms](https://help.zoho.com/portal/en/kb/forms/user-guide/form-settings/webhooks/articles/webhooks) | `phone_number` key + `Field_N` pattern | Use the CTM Form Reactor URL as the webhook endpoint. |
+| **Any other JSON vendor** | Generic fallback: scans all keys and values for phone, email, and name patterns | Paste the Form Reactor URL directly into the vendor's webhook or notification URL field. |
 
 Even for unrecognized vendors, the parser scans field names and values to match phone numbers, email addresses, and names automatically. Any JSON webhook with a phone number in it should produce a valid CTM activity.
 
@@ -86,34 +86,7 @@ Copy this URL — this is where your form vendor will send its webhook.
 
 ### Step 4 — Configure Your Form Vendor's Webhook
 
-Paste the Form Reactor POST URL as the webhook destination in your form tool.
-
-| Vendor | Webhook Setup Docs | Notes for CTM Form Reactor |
-|---|---|---|
-| ActiveCampaign | [Create a webhook](https://developers.activecampaign.com/reference/create-a-webhook) | Best fit if setting up via API/dev docs. For UI-based automations, ActiveCampaign's automation webhook action may be more relevant. |
-| Cognito Forms | [Webhooks](https://www.cognitoforms.com/support/69/entries/webhooks) | Use the CTM Form Reactor URL as the webhook endpoint. |
-| Elementor Forms | [Webhook Form Action](https://elementor.com/help/webhook-form-action/) | Best direct article for Elementor Pro Forms "Actions After Submit → Webhook." |
-| Facebook / Meta Lead Ads | [Lead Ads Webhooks](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | More technical than most form tools; requires Meta app/webhook setup. Subscribe to `leadgen` events. |
-| Fluent Forms | [Webhook Integration](https://fluentforms.com/docs/fluent-forms-webhook/) | Use this for configuring POST to the CTM Form Reactor URL. |
-| Formaloo | [Webhooks](https://help.formaloo.com/en/articles/5561274-webhooks) | Use the webhook URL destination option. Formaloo supports multiple payload formats; both are handled automatically. |
-| FormAssembly | [Webhooks Connector](https://help.formassembly.com/help/webhooks-connector) | Best article for posting submission data to an external endpoint. |
-| Formidable Forms | [API Webhooks](https://formidableforms.com/knowledgebase/form-actions/#api-webhooks) | Usually configured as a form action. |
-| Formstack | [Webhooks](https://help.formstack.com/hc/en-us/articles/360019520251-Webhooks) | Best direct setup article for Formstack Forms webhook delivery. |
-| GoFormz | [Webhooks](https://support.goformz.com/hc/en-us/articles/360045747812-Webhooks) | Add a Webhook action in GoFormz Workflows. Name your template fields semantically (e.g. `CustomerPhone`, `ContactEmail`) — the parser matches by field name. A field named `Field_23` will not be recognized. |
-| GoHighLevel | [Workflow Action: Webhook](https://help.gohighlevel.com/support/solutions/articles/155000001108-workflow-action-webhook) | Use the form's "Webhook" workflow action. Select `POST` and paste the Form Reactor URL. |
-| Gravity Forms | [Webhooks Add-On](https://docs.gravityforms.com/webhooks-add-on/) | Best official doc for sending Gravity Forms submissions to an external URL. |
-| HubSpot | [Use webhooks with workflows](https://knowledge.hubspot.com/workflows/how-do-i-use-webhooks-with-hubspot-workflows) | Best UI-oriented article if sending form/contact data from workflows. |
-| JotForm | [How to Set Up Webhooks](https://www.jotform.com/help/27-how-to-setup-webhooks/) | **Enable "Send as JSON"** in JotForm webhook settings. Without it, CTM receives `multipart/form-data` and the Lambda sees an empty body. |
-| Klaviyo | [Webhooks](https://developers.klaviyo.com/en/docs/webhooks) | Developer docs are the best fit; payload is JSON:API-style. |
-| Pipedrive | [Guide for Webhooks](https://pipedrive.readme.io/docs/guide-for-webhooks) | Subscribe to `added.deal` or `added.person` events. Contact name, email, and phone are extracted from the linked person record; company name and deal title are included as custom fields. |
-| Process Street | [Webhooks](https://www.process.st/help/docs/webhooks/) | Best article for pushing workflow/form field data to CTM. |
-| Tally | [Webhooks](https://tally.so/help/webhooks) | Straightforward: paste the CTM Form Reactor URL as the webhook endpoint. |
-| Typeform | [Webhooks](https://www.typeform.com/help/a/webhooks-360029573471/) | Enable **"Include response"** in Typeform webhook settings so the Lambda receives `form_response.answers[]`. |
-| WPForms | [Webhooks Addon](https://wpforms.com/docs/how-to-use-the-webhooks-addon-with-wpforms/) | Best official setup article for WPForms Pro webhook delivery. |
-| Wufoo | [Webhooks](https://help.wufoo.com/articles/en_US/SurveyMonkeyArticleType/Webhooks) | Enable **"Include Field and Form Structures with Entry Data"** to add `FieldNLabel` companion keys (e.g. `Field10Label: "First Name"`). Without it, name capture falls back to value scanning and may be incomplete. |
-| Zoho Forms | [Webhooks](https://help.zoho.com/portal/en/kb/forms/user-guide/form-settings/webhooks/articles/webhooks) | Best official article for Zoho Forms webhook configuration. |
-
-For any vendor not listed above, paste the Form Reactor URL directly into the vendor's webhook or notification URL field. No additional configuration is required.
+Paste the Form Reactor POST URL as the webhook destination in your form tool. Vendor-specific setup links and CTM notes are in the table at the top of this page.
 
 ---
 
