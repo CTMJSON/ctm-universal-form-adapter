@@ -325,6 +325,26 @@ function normalizeBody(body) {
     return ffFlat;
   }
 
+  // Formaloo readable format: {form_slug, submission_id, readable_data: {"Full Name": ..., "Email Address": ..., ...}}
+  // readable_data uses human-readable space-separated labels that match our key patterns directly.
+  if (body.readable_data &&
+      typeof body.readable_data === "object" &&
+      !Array.isArray(body.readable_data)) {
+    return body.readable_data;
+  }
+
+  // Formaloo raw format: {form_slug, submission_id, rendered_data: [{field_id, label, value}]}
+  // Convert the label/value array into a flat object so the same key patterns apply.
+  if (body.rendered_data && Array.isArray(body.rendered_data)) {
+    var fmlFlat = {};
+    for (i = 0; i < body.rendered_data.length; i++) {
+      var rd    = body.rendered_data[i];
+      var rdKey = trimValue(rd.label || rd.field_id || ("field_" + i));
+      if (rdKey && rd.value !== null && rd.value !== undefined) fmlFlat[rdKey] = rd.value;
+    }
+    return fmlFlat;
+  }
+
   // Process Street: {id, type, createdDate, data: {workflow, workflowRun, task, formFields: {...}}}
   // body.data is in NOISE_KEYS so the entire object would otherwise be suppressed.
   // formFields contains the actual submission data with user-defined field keys.
