@@ -18,6 +18,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
 | Process Street | `data.formFields` object (field keys are user-defined in the workflow) |
 | Formaloo | `readable_data` object or `rendered_data` array (both formats handled) |
+| Formstack | `fields` object of `{label, value}` descriptors keyed by field ID (`body.Form` confirms vendor) |
 | WPForms | `fields` object + `meta` object |
 | Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | Elementor Forms | `form_fields` object |

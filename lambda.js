@@ -356,6 +356,25 @@ function normalizeBody(body) {
     return body.data.formFields;
   }
 
+  // Formstack: {Form: {id, name, url}, Submission: {id, timestamp}, fields: {"11223344": {name, label, value}}}
+  // fields values are descriptor objects, not raw values; body.Form (capital F) confirms vendor.
+  // Use label as the key — it produces human-readable strings that match our key patterns directly.
+  if (body.fields &&
+      typeof body.fields === "object" &&
+      !Array.isArray(body.fields) &&
+      body.Form &&
+      typeof body.Form === "object") {
+    var fsFlat = {};
+    var fsKeys = Object.keys(body.fields);
+    for (i = 0; i < fsKeys.length; i++) {
+      var fsf = body.fields[fsKeys[i]];
+      if (!fsf || typeof fsf !== "object") continue;
+      var fsKey = trimValue(fsf.label || fsf.name || ("field_" + fsKeys[i]));
+      if (fsKey && fsf.value !== null && fsf.value !== undefined) fsFlat[fsKey] = fsf.value;
+    }
+    return fsFlat;
+  }
+
   // Formidable Forms: {form_id, item_id, item_key, fields: {first_name, last_name, email, ...}}
   // fields object uses semantic string keys — return it directly
   if (body.fields &&
