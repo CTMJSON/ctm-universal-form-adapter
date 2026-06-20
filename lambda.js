@@ -292,6 +292,17 @@ function normalizeBody(body) {
     return tallyFlat;
   }
 
+  // Cognito Forms: {FormId, FormName, DateSubmitted, Sequence, Fields: {FirstName, LastName, Email, ...}}
+  // Capital-F Fields + DateSubmitted distinguishes from all other vendors.
+  // Returning Fields directly works because keyContains() lowercases before matching,
+  // so PascalCase keys like FirstName, LastName, Email resolve correctly.
+  if (body.Fields &&
+      typeof body.Fields === "object" &&
+      !Array.isArray(body.Fields) &&
+      body.DateSubmitted !== undefined) {
+    return body.Fields;
+  }
+
   // Fluent Forms: {form_id, form_title, submission_id, inputs: {names: {first_name, last_name}, email, ...}}
   // inputs is a mixed object — some values are nested (names) and some are flat strings
   if (body.inputs &&

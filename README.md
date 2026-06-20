@@ -15,6 +15,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | Tally | `data.fields[]` array with typed fields |
 | Formidable Forms | `fields` object + `item_id` key |
 | Fluent Forms | `inputs` object (resolves nested `names.first_name/last_name`) |
+| Cognito Forms | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) |
 | WPForms | `fields` object + `meta` object |
 | Gravity Forms | `form_id` + `date_created` + numeric top-level keys |
 | Elementor Forms | `form_fields` object |
