@@ -527,6 +527,20 @@ function normalizeBody(body) {
     return inferHints(wfFlat);
   }
 
+  // GoFormz: {Event, Timestamp, Data: {Fields: {...}, Owner, ...}} envelope.
+  // Data (capital D) is suppressed by NOISE_KEYS["data"] in the generic path,
+  // swallowing all field content. Fields contains user-defined form field keys —
+  // return it directly. Owner (the submitting user's email) is carried as
+  // owner_email so keyContains("email") catches it when Fields has no email key.
+  if (body.Data && typeof body.Data === "object" && body.Data.Fields && body.Event) {
+    var gfzFlat = {};
+    var gfzFields = body.Data.Fields;
+    var gfzKeys = Object.keys(gfzFields);
+    for (i = 0; i < gfzKeys.length; i++) gfzFlat[gfzKeys[i]] = gfzFields[gfzKeys[i]];
+    if (body.Data.Owner) gfzFlat.owner_email = body.Data.Owner;
+    return gfzFlat;
+  }
+
   // Pipedrive: {event, meta, current, previous} envelope.
   // Deal webhooks nest the contact in current.person_id; person webhooks
   // put name/email/phone directly on current. Email and phone are arrays
