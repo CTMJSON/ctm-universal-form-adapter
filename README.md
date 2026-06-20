@@ -249,6 +249,17 @@ This means the activity is still logged in CTM and the error is visible in the a
 
 ---
 
+## Request an Integration
+
+This is an experimental tool maintained by [jason.smith@ctm.com](mailto:jason.smith@ctm.com). If your form vendor isn't on the list, you can request support in two ways:
+
+- **[Fill out the integration request form](https://docs.google.com/forms/d/e/1FAIpQLSdFpDNkZY_HYoNOCqYhQxz3Ke2qsQZ-i0Tu7nHEK24uwT2WYw/viewform)** — the more detail you provide (webhook docs link, example JSON payload), the faster we can add support.
+- **Email** [jason.smith@ctm.com](mailto:jason.smith@ctm.com) directly with questions.
+
+**Before submitting, use [webhook.site](https://webhook.site) to capture your vendor's exact payload.** Point your form or automation at a webhook.site URL, submit a test entry, and paste the raw JSON you receive into the request form. This is the single most useful thing you can provide — it lets us build and test the handler without needing access to your account.
+
+---
+
 ## Files
 
 ```
