@@ -292,6 +292,15 @@ function normalizeBody(body) {
     return tallyFlat;
   }
 
+  // Formidable Forms: {form_id, item_id, item_key, fields: {first_name, last_name, email, ...}}
+  // fields object uses semantic string keys — return it directly
+  if (body.fields &&
+      typeof body.fields === "object" &&
+      !Array.isArray(body.fields) &&
+      body.item_id !== undefined) {
+    return body.fields;
+  }
+
   // WPForms: {form_id, form_name, fields: {"1": ..., "2": ...}, meta: {...}}
   if (body.fields &&
       typeof body.fields === "object" &&
