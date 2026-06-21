@@ -16,7 +16,7 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 | [Cognito Forms](https://www.cognitoforms.com/support/69/entries/webhooks) | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) | Use the CTM Form Reactor URL as the webhook endpoint. |
 | [Elementor Forms](https://elementor.com/help/webhook-form-action/) | `form_fields` object | Elementor Pro Forms: "Actions After Submit → Webhook." |
 | [Facebook / Meta Lead Ads](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | `object: "page"` + `entry[].changes[].value.field_data[]` | Requires Meta app/webhook setup. Subscribe to `leadgen` events. |
-| [FormAssembly](https://help.formassembly.com/help/webhook-connector](https://help.formassembly.com/help/webhook-connector) | `form_data` object with semantic field keys | Best article for posting submission data to an external endpoint. |
+| [FormAssembly](https://help.formassembly.com/help/webhook-connector) | `form_data` object with semantic field keys | Best article for posting submission data to an external endpoint. |
 | [Formaloo](https://help.formaloo.com/en/articles/5561274-webhooks) | `readable_data` object or `rendered_data` array (both formats handled) | Both payload formats are detected and handled automatically. |
 | [Formidable Forms](https://formidableforms.com/knowledgebase/form-actions/#api-webhooks) | `fields` object + `item_id` key | Configured as a form action in Formidable. |
 | [Formstack](https://help.formstack.com/hc/en-us/articles/360019520251-Webhooks) | `fields` object of `{label, value}` descriptors + `Form` object (capital F) | Use the CTM Form Reactor URL as the webhook endpoint. |
