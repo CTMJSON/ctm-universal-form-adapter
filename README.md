@@ -1,6 +1,6 @@
 # CTM Universal Form Adapter
 
-A universal Lambda function for [CTM](https://calltrackingmetrics.com) that parses webhook payloads from virtually any form vendor and normalizes them into the CTM FormReactor format — no per-customer configuration required.
+A universal Lambda function for [CTM](https://calltrackingmetrics.com) that parses webhook payloads from virtually any form vendor and normalizes them into the CTM FormReactor format — no per-customer or per-vendor configuration required.
 
 ## What It Does
 
