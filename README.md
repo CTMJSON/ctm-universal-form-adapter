@@ -1,6 +1,6 @@
 # CTM Universal Form Adapter
 
-A universal Lambda function for [CTM](https://calltrackingmetrics.com) that parses webhook payloads from virtually any form vendor and normalizes them into the CTM Form Reactor format — no per-customer configuration required.
+A universal Lambda function for [CTM](https://calltrackingmetrics.com) that parses webhook payloads from virtually any form vendor and normalizes them into the CTM FormReactor format — no per-customer configuration required.
 
 ## What It Does
 
@@ -8,21 +8,21 @@ When a web form is submitted, most form vendors POST a webhook to a URL you spec
 
 **Natively recognized vendors:**
 
-| Vendor | Detection Method | Notes for CTM Form Reactor |
+| Vendor | Detection Method | Notes for CTM FormReactor |
 |---|---|---|
 | [ActiveCampaign](https://developers.activecampaign.com/reference/create-a-webhook) | `contact` object with `{email, first_name, last_name, phone}` | Best fit if setting up via API/dev docs. For UI-based automations, ActiveCampaign's automation webhook action may be more relevant. |
 | [ClickFunnels](https://developers.myclickfunnels.com/docs/webhooks) | `event.type` + `data.funnel_id` (data suppressed in generic path) | Select **JSON** as the adapter in ClickFunnels webhook settings — not "Form Data." |
 | [Contact Form 7](https://cf7apps.com/docs/integration/webhook/) | `fields` object + `page_url` or `submission_date` (intercepted before WPForms false-positive) | Requires a webhook plugin (CF7 Apps or RT Webhook for CF7). Set content type to `application/json`. The default `your-{fieldname}` prefix is stripped automatically. |
-| [Cognito Forms](https://www.cognitoforms.com/support/69/entries/webhooks) | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) | Use the CTM Form Reactor URL as the webhook endpoint. |
+| [Cognito Forms](https://www.cognitoforms.com/support/69/entries/webhooks) | `Fields` object + `DateSubmitted` key (PascalCase keys handled automatically) | Use the CTM FormReactor URL as the webhook endpoint. |
 | [Elementor Forms](https://elementor.com/help/webhook-form-action/) | `form_fields` object | Elementor Pro Forms: "Actions After Submit → Webhook." |
 | [Facebook / Meta Lead Ads](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/instant-forms/webhooks/) | `object: "page"` + `entry[].changes[].value.field_data[]` | Requires Meta app/webhook setup. Subscribe to `leadgen` events. |
 | [FormAssembly](https://help.formassembly.com/help/webhook-connector) | `form_data` object with semantic field keys | Best article for posting submission data to an external endpoint. |
 | [Formaloo](https://help.formaloo.com/en/articles/5561274-webhooks) | `readable_data` object or `rendered_data` array (both formats handled) | Both payload formats are detected and handled automatically. |
 | [Formidable Forms](https://formidableforms.com/knowledgebase/form-actions/#api-webhooks) | `fields` object + `item_id` key | Configured as a form action in Formidable. |
 | [Formstack](https://help.formstack.com/hc/en-us/articles/360019520251-Webhooks) | `fields` object of `{label, value}` descriptors + `Form` object (capital F) | Use the CTM Form Reactor URL as the webhook endpoint. |
-| [Fluent Forms](https://fluentforms.com/docs/fluent-forms-webhook/) | `inputs` object (resolves nested `names.first_name/last_name`) | Use this for configuring POST to the CTM Form Reactor URL. |
+| [Fluent Forms](https://fluentforms.com/docs/fluent-forms-webhook/) | `inputs` object (resolves nested `names.first_name/last_name`) | Use this for configuring POST to the CTM FormReactor URL. |
 | [GoFormz](https://support.goformz.com/hc/en-us/articles/360045747812-Webhooks) | `Data.Fields` object + `Event` key (PascalCase envelope) | Add a Webhook action in GoFormz Workflows. Name template fields semantically (e.g. `CustomerPhone`, `ContactEmail`) — a field named `Field_23` will not be recognized. |
-| [GoHighLevel](https://help.gohighlevel.com/support/solutions/articles/155000001108-workflow-action-webhook) | `type: "FormSubmission"` + `contact` object | Use the "Webhook" workflow action. Select `POST` and paste the Form Reactor URL. |
+| [GoHighLevel](https://help.gohighlevel.com/support/solutions/articles/155000001108-workflow-action-webhook) | `type: "FormSubmission"` + `contact` object | Use the "Webhook" workflow action. Select `POST` and paste the FormReactor URL. |
 | [Gravity Forms](https://docs.gravityforms.com/webhooks-add-on/) | `form_id` + `date_created` + numeric top-level keys | Requires the Gravity Forms Webhooks Add-On. |
 | [Housecall Pro](https://docs.housecallpro.com/docs/housecall-public-api/46e9e1be07621-webhooks) | `event` string + `data.customer` object (data suppressed in generic path) | Requires MAX plan; activate via the Housecall Pro App Store. Invoice total, balance due, job number, job status, arrival window, and assigned tech are included as custom fields. |
 | [HubSpot](https://knowledge.hubspot.com/workflows/how-do-i-use-webhooks-with-hubspot-workflows) | Form submission `{submittedAt, data: [{name,value}]}` or contact webhook `[{properties:{}}]` | Best UI-oriented article if sending form/contact data from workflows. |
